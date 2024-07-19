@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { Input } from "~/components/ui/input";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
  
 const FormSchema = z.object({
@@ -15,7 +16,7 @@ const FormSchema = z.object({
 })
 
 const SignInForm = () => {
-
+  const router = useRouter()
     const form = useForm<z.infer<typeof FormSchema>>({
         resolver: zodResolver(FormSchema),
         defaultValues: {
@@ -23,14 +24,29 @@ const SignInForm = () => {
         },
       })
 
-      const onSubmit = (values: z.infer<typeof FormSchema> ) =>{
-        console.log(values)
+      const onSubmit = async (values: z.infer<typeof FormSchema> ) =>{
+        const response = await fetch('/api/sign-in',{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            email: values.email,
+            password: values.password
+          })
+        })
+        if (response.ok) {
+          router.push('/categories');
+        } else {
+          console.log('Registration failed', Error);
+          
+        }
       }
 
 
     return (
-    <div className=" border rounded-2xl border-l-slate-300 p-5 pt-6 px-10">
-      <div className="text-center text-2xl pt-0">
+    <div className=" border rounded-2xl border-slate-500 p-5 pt-5 px-10 mb-32">
+      <div className="text-center text-2xl pt-0 mb-6 align-text-top">
         <h1><b>Login</b></h1>
       </div>
       <Form {...form}>

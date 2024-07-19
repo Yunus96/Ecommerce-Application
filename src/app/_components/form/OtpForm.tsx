@@ -1,62 +1,105 @@
-function OtpForm() {
-    return ( 
+"use client"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import axios, { AxiosError } from 'axios'
+import { Button } from "~/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form"
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "~/components/ui/input-otp"
+import { toast, useToast } from "~/components/ui/use-toast"
+import { useParams, useRouter } from "next/navigation"
+import { ApiResponse } from "~/types/ApiResponse"
 
-<div className="relative flex min-h-screen flex-col justify-center overflow-hidden py-12">
-  <div className="relative bg-white px-6 pt-5 pb-9 shadow-xl mx-auto w-full max-w-lg border-2 rounded-2xl">
-    <div className="mx-auto flex w-full max-w-md flex-col space-y-16">
-      <div className="flex flex-col items-center justify-center text-center space-y-2">
-        <div className="font-semibold text-2xl">
-          <p>Verify your Email</p>
-        </div>
-        <div className="flex flex-row text-sm font-medium text-gray-400">
-          <p>We have sent a code to your email <br/> ba**@dipainhouse.com</p>
-        </div>
-      </div>
+const FormSchema = z.object({
+  pin: z.string().min(8, {
+    message: "Your one-time password must be 8 characters.",
+  }),
+})
 
-      <div>
-        <form action="" method="post">
-          <div className="flex flex-col space-y-16">
-            <div className="flex flex-row items-center justify-between  w-full max-w-xs">
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-400 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-              <div className="w-13 h-16 m-2">
-                <input className="w-full h-full flex flex-col items-center justify-center text-center px-5 outline-none rounded-xl border border-gray-200 text-lg bg-white focus:bg-gray-50 focus:ring-1 ring-blue-700" type="text" name="" id="" />
-              </div>
-            </div>
+export default function OtpForm() {
+  const router = useRouter()
+  const params = useParams()
+  const { toast } = useToast()
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
+    defaultValues: {
+      pin: "",
+    },
+  })
 
-            <div className="flex flex-col space-y-5">
-              <div>
-                <button className="flex flex-row items-center justify-center text-center w-full border rounded-xl outline-none py-5 bg-black border-none text-white text-sm shadow-sm">
-                  Verify Account
-                </button>
-              </div>
-            </div>
-          </div>
+  
+  const onSubmit = async (data: any) => {
+    console.log(params.email, data.code);
+    try {
+      const response = await axios.post('/api/verify-code', {
+        email : params.email,
+        code : data.code
+      })
+      toast({
+        title: "success",
+        description: response.data.message
+      })
+      router.replace('sign-in')
+    } catch (error) {
+      console.error("Error in signup of user", error);
+      const axiosError = error as AxiosError<ApiResponse>;
+ 
+      toast({
+        title: "Verification code failed",
+        description : axiosError.response?.data.message,
+        variant: "destructive"
+      })
+      
+    }
+  }
+
+  return (
+    <div className=" mb-36 border rounded-2xl border-slate-500 p-10 pt-14">
+      <Form {...form} >
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
+          <FormField
+            control={form.control}
+            name="pin"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xl">One-Time Password</FormLabel>
+                <FormDescription>
+                  Please enter the one-time password sent to your Email.
+                </FormDescription>
+                <FormControl>
+                  <InputOTP maxLength={8} {...field}>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} className="border-slate-900"/>
+                      <InputOTPSlot index={1} className="border-slate-900"/>
+                      <InputOTPSlot index={2} className="border-slate-900"/>
+                      <InputOTPSlot index={3} className="border-slate-900"/>
+                      <InputOTPSlot index={4} className="border-slate-900"/>
+                      <InputOTPSlot index={5} className="border-slate-900"/>
+                      <InputOTPSlot index={6} className="border-slate-900"/>
+                      <InputOTPSlot index={7} className="border-slate-900"/>
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button type="submit">Submit</Button>
         </form>
-      </div>
+      </Form>
     </div>
-  </div>
-</div>
-     );
+  )
 }
-
-export default OtpForm;
