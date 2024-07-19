@@ -1,10 +1,10 @@
 import React from "react";
-import SignInForm from "~/app/_components/form/SignInForm";
+import OtpForm from "~/app/_components/form/OtpForm";
 
 const page = () => {
     return (
-    <div className="w-full">
-        <SignInForm />
+    <div className="">
+        <OtpForm />
     </div>
     )
 }
