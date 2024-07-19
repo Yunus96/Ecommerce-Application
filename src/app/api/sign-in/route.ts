@@ -15,7 +15,10 @@ export async function POST(request: NextRequest){
             where: {email}
         })
         if(!user){
-            return NextResponse.json({error: "User does not exist"}, {status: 400})
+            return NextResponse.json(
+                {error: "User does not exist"}, 
+                {status: 400}
+                )
         }
         
         //check if password is correct
@@ -38,8 +41,7 @@ export async function POST(request: NextRequest){
             success: true,
         })
         response.cookies.set("token", token, {
-            httpOnly: true, 
-            
+            httpOnly: true,    
         })
         return response;
 

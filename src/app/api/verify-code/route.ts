@@ -1,11 +1,9 @@
 import { db } from "~/server/db";
 import { NextRequest, NextResponse } from "next/server";
-import { Code } from "lucide-react";
-import { date } from "zod";
 
 export async function POST(request: Request) {
     try {
-        const { email, code } = await request.json()
+        const { email, verifyCode } = await request.json()
         
         const decodedEmail = decodeURIComponent(email);
         const user = await db.user.findUnique({
@@ -19,7 +17,9 @@ export async function POST(request: Request) {
                 }
                 , {status: 404})
         }
-        const isCodeValid = user.verifyCode === code;
+        console.log(typeof user.verifyCode,typeof verifyCode);
+        
+        const isCodeValid = Number(user.verifyCode) === verifyCode;
         const isCodeNotExpired = new Date(user.verifyCodeExpiry ||"") > new Date();
 
         if (isCodeValid && isCodeNotExpired) {

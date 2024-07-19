@@ -29,7 +29,7 @@ const SignInForm = () => {
 
 
     return (
-    <div className=" border rounded-2xl border-l-slate-300 p-5 pt-3">
+    <div className=" border rounded-2xl border-l-slate-300 p-5 pt-6 px-10">
       <div className="text-center text-2xl pt-0">
         <h1><b>Login</b></h1>
       </div>
