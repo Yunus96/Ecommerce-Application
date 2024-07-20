@@ -1,10 +1,11 @@
 import { db } from "~/server/db";
 import { NextRequest, NextResponse } from "next/server";
+import { any } from "zod";
 
 export async function POST(request: Request) {
     try {
         const { email, verifyCode } = await request.json()
-        
+        console.log(email, verifyCode)
         const decodedEmail = decodeURIComponent(email);
         const user = await db.user.findUnique({
             where: {email}
@@ -16,11 +17,11 @@ export async function POST(request: Request) {
                     message : "User not found"
                 }
                 , {status: 404})
-        }
-        console.log(typeof user.verifyCode,typeof verifyCode);
-        
+        };
+        const codeExpiry =user.verifyCodeExpiry || ""
+        console.log(codeExpiry)
         const isCodeValid = Number(user.verifyCode) === verifyCode;
-        const isCodeNotExpired = new Date(user.verifyCodeExpiry ||"") > new Date();
+        const isCodeNotExpired = codeExpiry > new Date();
 
         if (isCodeValid && isCodeNotExpired) {
             await db.user.update({

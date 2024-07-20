@@ -23,7 +23,7 @@ import { useParams, useRouter } from "next/navigation"
 import { ApiResponse } from "~/types/ApiResponse"
 
 const FormSchema = z.object({
-  pin: z.string().min(8, {
+  verifyCode: z.string().min(8, {
     message: "Your one-time password must be 8 characters.",
   }),
 })
@@ -35,34 +35,28 @@ export default function OtpForm() {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      pin: "",
+      verifyCode: "",
     },
   })
 
   
-  const onSubmit = async (data: any) => {
-    console.log(params.email, data.code);
-    try {
-      const response = await axios.post('/api/verify-code', {
-        email : params.email,
-        code : data.code
+  const onSubmit = async (data:any) => {
+    const response = await fetch('/api/verify-code',{
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: params.email,
+        verifyCode: data.verifyCode
       })
-      toast({
-        title: "success",
-        description: response.data.message
-      })
-      router.replace('sign-in')
-    } catch (error) {
-      console.error("Error in signup of user", error);
-      const axiosError = error as AxiosError<ApiResponse>;
- 
-      toast({
-        title: "Verification code failed",
-        description : axiosError.response?.data.message,
-        variant: "destructive"
-      })
-      
-    }
+    })
+      console.log(response)
+      if (response.ok) {
+        router.replace('sign-in')
+      } else {
+        console.error("Error in signup of user");
+      }
   }
 
   return (
@@ -71,7 +65,7 @@ export default function OtpForm() {
         <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
           <FormField
             control={form.control}
-            name="pin"
+            name="verifyCode"
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xl">One-Time Password</FormLabel>
