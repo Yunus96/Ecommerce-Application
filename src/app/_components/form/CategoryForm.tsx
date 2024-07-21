@@ -1,5 +1,6 @@
 "use client"
 
+import { faker,simpleFaker } from '@faker-js/faker';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -28,7 +29,7 @@ import {
 import { toast } from "~/components/ui/use-toast"
 import { useEffect, useState } from "react";
 
-const items = [{"id":1,"label":"Grocery"},
+let items = [{"id":1,"label":"Grocery"},
     {"id":2,"label":"Electronics"},
     {"id":3,"label":"Clothing"},
     {"id":4,"label":"Grocery"},
@@ -127,7 +128,7 @@ const items = [{"id":1,"label":"Grocery"},
     {"id":97,"label":"Baby"},
     {"id":98,"label":"Toys"},
     {"id":99,"label":"Jewelry"},
-    {"id":100,"label":"Tools"}] as const
+    {"id":100,"label":"Tools"}]
 
 const FormSchema = z.object({
   items: z.array(z.string()).refine((value) => value.some((item) => item), {
@@ -144,25 +145,23 @@ export function CategoryForm() {
     },
   })
 
-  function onSubmit(data: z.infer<typeof FormSchema>) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
-  }
-  const [data, setData] = useState([]);
-  const [currentPage, setcurrentPage] = useState(1);
+
+  let selectedCategories: string[][]  = []
+  const [selectCat, setSelectedCat ] = useState([])
+  const [data, setData] = useState(items);
+  const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setitemsPerPage] = useState(6);
   const lastItemIndex = currentPage * itemsPerPage;
   const firstItemIndex = lastItemIndex - itemsPerPage;
   const currentItem = data.slice(firstItemIndex, lastItemIndex)
 
+  function onSubmit(data: any) {
+    setSelectedCat([selectedCategories]);
+    
+  }
+  console.log(selectCat);
   return (
-    <div className="mb-0 text-center border rounded-2xl border-slate-500 p-10">
+    <div className="mb-0 text-center border rounded-2xl border-slate-500 p-10 pt-3 mt-0">
         <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -176,9 +175,9 @@ export function CategoryForm() {
                     We will keep you notified
                     </FormDescription>
                 </div>
-                {items.map((item) => (
+                {currentItem.map((item, idx) => (
                     <FormField
-                    key={item.id}
+                    key={idx}
                     control={form.control}
                     name="items"
                     render={({ field }) => {
@@ -189,8 +188,10 @@ export function CategoryForm() {
                         >
                             <FormControl>
                             <Checkbox
-                                checked={field.value?.includes(String(item.id))}
+                                checked={field.value?.includes(item.id)}
+                      
                                 onCheckedChange={(checked) => {
+                                  selectedCategories.push(field.value)
                                 return checked
                                     ? field.onChange([...field.value, item.id])
                                     : field.onChange(
@@ -217,7 +218,7 @@ export function CategoryForm() {
             totalItems={data.length}
             itemsPerPage={itemsPerPage}
             currentPage={currentPage}
-            setcurrentPage={setcurrentPage}
+            setcurrentPage={setCurrentPage}
             />
             <Button type="submit" className="w-full">Submit</Button>
         </form>
@@ -238,27 +239,40 @@ function PaginationSection({
     currentPage: any,
     setcurrentPage : any  
 }){
-        return( <Pagination>
+  let pages = []
+  for (let i = 0; i < Math.ceil(totalItems / itemsPerPage); i++) {
+    pages.push(i)
+  }
+
+  const handleNextPage = ()=>{
+    if (currentPage < pages.length) {
+        setcurrentPage(currentPage + 1)
+    }
+  }
+  const handlePrevPage = ()=>{
+      if (currentPage > 1) {
+          setcurrentPage(currentPage - 1)
+      }
+  }
+    return( 
+    <Pagination>
             <PaginationContent>
                 <PaginationItem>
-                <PaginationPrevious href="#" />
-                </PaginationItem>
+                  <PaginationPrevious onClick={()=> handlePrevPage()} />
+                </PaginationItem>  
+
+                {pages.map((page, idx)=>(
+                    <PaginationItem
+                    key={idx}
+                    className={currentPage === page ? "bg-gray-400 rounded-md": ""}>
+                      <PaginationLink onClick={()=>setCurrentPage(page)}>
+                        {page}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
+                
                 <PaginationItem>
-                <PaginationLink href="#">1</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                <PaginationLink href="#" isActive>
-                    2
-                </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                <PaginationLink href="#">3</PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                <PaginationNext href="#" />
+                <PaginationNext onClick={()=> handleNextPage()} />
                 </PaginationItem>
             </PaginationContent>
             </Pagination>

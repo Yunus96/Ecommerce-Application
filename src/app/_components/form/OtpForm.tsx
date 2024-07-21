@@ -31,33 +31,42 @@ const FormSchema = z.object({
 export default function OtpForm() {
   const router = useRouter()
   const params = useParams()
-  const { toast } = useToast()
+
   const form = useForm<z.infer<typeof FormSchema>>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      verifyCode: "",
-    },
+    resolver: zodResolver(FormSchema)
   })
 
   
-  const onSubmit = async (data:any) => {
-    const response = await fetch('/api/verify-code',{
+  const onSubmit = async (values: any) => {
+      {/*const response = await axios.post('/api/verify-code',{
+        email: params.email,
+        verifyCode: data.verifyCode
+      })
+      console.log(response)
+      if (response) {
+        router.replace('sign-in')
+      } else {
+        console.error("Error in signup of user");
+      }*/}
+
+      const response = await fetch('/api/verify',{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         email: params.email,
-        verifyCode: data.verifyCode
+        verifyCode: Number(values.verifyCode)
       })
     })
-      console.log(response)
+    console.log(response)
       if (response.ok) {
         router.replace('sign-in')
       } else {
         console.error("Error in signup of user");
       }
-  }
+    }
+  
 
   return (
     <div className=" mb-36 border rounded-2xl border-slate-500 p-10 pt-14">
