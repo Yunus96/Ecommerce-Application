@@ -38,34 +38,24 @@ export default function OtpForm() {
 
   
   const onSubmit = async (values: any) => {
-      {/*const response = await axios.post('/api/verify-code',{
-        email: params.email,
-        verifyCode: data.verifyCode
-      })
-      console.log(response)
-      if (response) {
-        router.replace('sign-in')
-      } else {
-        console.error("Error in signup of user");
-      }*/}
-
-      const response = await fetch('/api/verify',{
+    const response = await fetch('/api/verify',{
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         email: params.email,
-        verifyCode: Number(values.verifyCode)
+        verifyCode: values.password
       })
     })
     console.log(response)
-      if (response.ok) {
-        router.replace('sign-in')
-      } else {
-        console.error("Error in signup of user");
-      }
+    if (response.ok) {
+      router.push('/sign-in');
+    } else {
+      console.log('User verification failed', Error);
+      
     }
+  }
   
 
   return (

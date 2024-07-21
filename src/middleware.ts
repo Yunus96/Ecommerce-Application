@@ -20,6 +20,5 @@ export const config = {
         '/',
         '/sign-in',
         '/sign-up',
-        '/otp'
     ]
 }
