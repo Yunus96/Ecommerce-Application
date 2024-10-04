@@ -15,9 +15,11 @@ datasource db {
 }
 
 model Categories {
-  name   String  @unique
-  User   User?   @relation(fields: [username], references: [id])
-  username String?
+  id     Int @unique @default(autoincrement())
+  labelId Int
+  label   String 
+  email User @relation(fields: [userEmail], references: [email])
+  userEmail String
 }
 
 model User {

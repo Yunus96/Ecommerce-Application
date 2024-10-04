@@ -38,23 +38,30 @@ export default function OtpForm() {
 
   
   const onSubmit = async (values: any) => {
-    const response = await fetch('/api/verify',{
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        email: params.email,
-        verifyCode: values.password
-      })
-    })
-    console.log(response)
-    if (response.ok) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/verify', true); // Replace with your API endpoint
+    xhr.setRequestHeader('Content-type', 'application/json');
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        const responseData = JSON.parse(xhr.responseText);
+        // Handle the response data (e.g., update state or render UI)
+        console.log(responseData)
+      }
+    };
+    let data = {
+      email: params.email,
+      verifyCode: values.verifyCode
+    }
+    xhr.send(JSON.stringify(data));
+
+    
+
+
+    {/*if (null) {
       router.push('/sign-in');
     } else {
       console.log('User verification failed', Error);
-      
-    }
+    }*/}
   }
   
 

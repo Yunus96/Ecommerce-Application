@@ -146,8 +146,8 @@ export function CategoryForm() {
   })
 
 
-  let selectedCategories: string[][]  = []
-  const [selectCat, setSelectedCat ] = useState([])
+  let selectedCategories  = []
+  const [selectCat, setSelectedCat ] = useState<string[]> ([])
   const [data, setData] = useState(items);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setitemsPerPage] = useState(6);
@@ -156,10 +156,9 @@ export function CategoryForm() {
   const currentItem = data.slice(firstItemIndex, lastItemIndex)
 
   function onSubmit(data: any) {
-    setSelectedCat([selectedCategories]);
-    
+    setSelectedCat([...selectCat,data]);
+    console.log(selectCat) 
   }
-  console.log(selectCat);
   return (
     <div className="mb-0 text-center border rounded-2xl border-slate-500 p-10 pt-3 mt-0">
         <Form {...form}>
@@ -189,9 +188,9 @@ export function CategoryForm() {
                             <FormControl>
                             <Checkbox
                                 checked={field.value?.includes(item.id)}
-                      
+                                          
                                 onCheckedChange={(checked) => {
-                                  selectedCategories.push(field.value)
+                                  
                                 return checked
                                     ? field.onChange([...field.value, item.id])
                                     : field.onChange(
@@ -218,7 +217,7 @@ export function CategoryForm() {
             totalItems={data.length}
             itemsPerPage={itemsPerPage}
             currentPage={currentPage}
-            setcurrentPage={setCurrentPage}
+            setCurrentPage={setCurrentPage}
             />
             <Button type="submit" className="w-full">Submit</Button>
         </form>
@@ -231,13 +230,13 @@ function PaginationSection({
     totalItems,
     itemsPerPage,
     currentPage,
-    setcurrentPage
+    setCurrentPage
 }:
 {
     totalItems: any,
     itemsPerPage: any,
     currentPage: any,
-    setcurrentPage : any  
+    setCurrentPage : any  
 }){
   let pages = []
   for (let i = 0; i < Math.ceil(totalItems / itemsPerPage); i++) {
@@ -246,12 +245,12 @@ function PaginationSection({
 
   const handleNextPage = ()=>{
     if (currentPage < pages.length) {
-        setcurrentPage(currentPage + 1)
+        setCurrentPage(currentPage + 1)
     }
   }
   const handlePrevPage = ()=>{
       if (currentPage > 1) {
-          setcurrentPage(currentPage - 1)
+          setCurrentPage(currentPage - 1)
       }
   }
     return( 
